@@ -1,5 +1,3 @@
-const users = [{ email: "admin@gmail.com", password: "Admin" }];
-
 const loginForm = document.getElementById("loginForm");
 const errorMsg = document.getElementById("error-msg");
 const welcomeContainer = document.getElementById("welcome-container");
@@ -10,10 +8,29 @@ if (localStorage.getItem("loggedInUser")) {
   showWelcomePage();
 }
 
-loginForm.addEventListener("submit", function (event) {
+async function usersApi() {
+  try {
+    const res = await fetch("http://localhost:3000/users");
+    if (!res.ok) {
+      throw new Error("Failed to fetch");
+    }
+    return await res.json();
+  } catch (error) {
+    errorMsg.textContent = "Error fetching users";
+  }
+}
+
+loginForm.addEventListener("submit", async function (event) {
   event.preventDefault();
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
+
+  const users = await usersApi();
+  console.log(users);
+  if (!users) {
+    errorMsg.textContent = "Error fetching users, try Again";
+    return;
+  }
   const user = users.find((u) => u.email === email && u.password === password);
 
   if (user) {
